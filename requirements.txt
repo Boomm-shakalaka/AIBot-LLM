@@ -1,4 +1,9 @@
 streamlit
+langchain-community
 langchain
 langchain-groq
 python-dotenv
+st-pages
+BeautifulSoup4
+sentence_transformers
+chromadb

@@ -5,6 +5,16 @@
 Langchain, Streamlit, Oracle Cloud
 
 ## 版本更新
+v0.0.2
+1. chatbot新增聊天记录功能，新增chatbot根据历史聊天记录回答
+2. 优化prompt
+3. 优化侧边栏架构
+4. 新增URLPage和URLBot内容，可以根据URL进行检索
+5. 新增Embedding功能
+
+
 v0.0.1
-1. 构建Streamlit网页基本框架，集成chatBot对话功能
+1. 构建Streamlit网页基本框架
+2. 新增chatBot对话功能
+3. 新增模型选择功能
 

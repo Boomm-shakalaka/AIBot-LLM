@@ -58,7 +58,7 @@ show_pages(
         Section(name='AI功能',icon='🤖'),
         Page("ChatPage.py", "聊天机器人ChatBot"),
         # Page("URLPage.py", "URL机器人URLBot"),
-        Page("PDFPage.py", "PDF机器人PDFBot"),
+        Page("pdfPage.py", "PDF机器人PDFBot"),
         # Page("SummaryPage.py", "摘要机器人SummaryBot"),
         # Page("AboutPage.py", "关于About")
     ]

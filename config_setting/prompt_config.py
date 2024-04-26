@@ -11,3 +11,12 @@ qa_system_prompt = """You are an assistant for question-answering tasks. \
 Use the following pieces of retrieved context to answer the question. \
 If you don't know the answer, just say that you don't know. \
 {context}"""
+chatBot_template_prompt_zh="""
+                        你是一个有用的助手。请你回答所有问题。
+                        当问题是中文时，你也可以用中文回答。
+                        当问题是中文以外的语言时，你需要用英文回答。
+                        必要时，你可以查看我们的聊天记录。
+                        如果不知道，你可以要求提供更多信息，或者你可以进行一些适当的猜测。
+                        question: {question}.
+                        chat_history:{chat_history}.
+                        """

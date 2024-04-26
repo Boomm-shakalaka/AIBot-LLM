@@ -5,16 +5,25 @@
 Langchain, Streamlit, Oracle Cloud
 
 ## 版本更新
+v0.0.2.1 (oracle cloud)
+1. 优化侧边栏架构
+2. 优化chatbot对话能力
+3. 优化chatbot prompt
+4. 新增chatbot streaming输出
+
 v0.0.2
-1. chatbot新增聊天记录功能，新增chatbot根据历史聊天记录回答
-2. 优化prompt
-3. 优化侧边栏架构
-4. 新增URLPage和URLBot内容，可以根据URL进行检索
-5. 新增Embedding功能
+1. chatbot新增聊天记录功能
+2. 新增prompt_config，优化prompt
+3. 构建URLPage网页基本框架
+4. 新增URLBot，可以根据URL进行检索
+5. 优化URL解析动画
+
 
 
 v0.0.1
 1. 构建Streamlit网页基本框架
-2. 新增chatBot对话功能
-3. 新增模型选择功能
+2. 新增chatBot页面，编辑聊天窗口及侧边栏
+3. 添加Groq API，新增5种LLM模型
+4. 添加大模型于chatBot页面，完成聊天对话基本功能
+5. 新增模型选择功能
 

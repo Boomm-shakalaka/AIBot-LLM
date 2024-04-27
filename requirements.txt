@@ -5,5 +5,5 @@ langchain-groq
 python-dotenv
 st-pages
 BeautifulSoup4
-sentence_transformers
+langchain_cohere
 chromadb

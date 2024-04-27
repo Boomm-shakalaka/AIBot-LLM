@@ -5,6 +5,11 @@
 Langchain, Streamlit, Oracle Cloud, Groq, Docker
 
 ## 版本更新
+v0.0.3 (oracle cloud)
+1. 优化和完善URLBot检索能力
+2. 优化和完善URLPage网页架构
+2. 使用Cohere API进行Embedding
+
 v0.0.2.1 (oracle cloud)
 1. 优化侧边栏架构
 2. 优化chatbot对话能力，优化prompt

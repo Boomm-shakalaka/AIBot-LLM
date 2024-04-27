@@ -1,7 +1,7 @@
 import streamlit as st
 from st_pages import Page, Section, show_pages, add_page_title
 import config_setting.model_config as model_config
-from config_setting import model_config, func_modules,prompt_config
+from config_setting import model_config, prompt_config
 from langchain_core.messages import AIMessage, HumanMessage
 
 

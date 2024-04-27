@@ -11,7 +11,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import requests
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
-import config_setting.prompt as prompt_config
+from config_setting import model_config, func_modules,prompt_config
 
 class Bot:
     def __init__(self,model_option):

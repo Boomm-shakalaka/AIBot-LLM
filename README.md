@@ -1,15 +1,17 @@
 ### 基于LLM大模型的AI机器人
 一套基于开源框架、平台的AI语言模型机器人，集成人机对话，信息检索生成，PDF和URL解析对话等功能。
 
-## 工具框架
-Langchain, Streamlit, Oracle Cloud
+## 工具和平台
+Langchain, Streamlit, Oracle Cloud, Groq, Docker
 
 ## 版本更新
 v0.0.2.1 (oracle cloud)
 1. 优化侧边栏架构
-2. 优化chatbot对话能力
-3. 优化chatbot prompt
-4. 新增chatbot streaming输出
+2. 优化chatbot对话能力，优化prompt
+3. 优化chatbot对话体验，更改为streaming输出流模式
+4. 由于服务器memory限制，暂时关闭URL检索功能
+5. 新增docker文件
+6. 修改页面布局默认为wide
 
 v0.0.2
 1. chatbot新增聊天记录功能

@@ -58,10 +58,16 @@ Langchain, Streamlit, Oracle Cloud, Groq, Docker
 
 
 ## 版本更新
+v0.0.4 (oracle cloud)
+1. 使用streamlit_option_menu框架重构界面
+2. 新增在线搜索功能，基于duckduckDuckDuckGoSearch
+3. 优化异步方法处理搜索功能
+4. 新增搜索agent提示词
+
 v0.0.3 (oracle cloud)
 1. 优化和完善URLBot检索能力
 2. 优化和完善URLPage网页架构
-2. 使用Cohere API进行Embedding
+3. 使用Cohere API进行Embedding
 
 v0.0.2.1 (oracle cloud)
 1. 优化侧边栏架构

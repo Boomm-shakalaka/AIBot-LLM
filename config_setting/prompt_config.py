@@ -40,3 +40,15 @@ rag_prompt="""
                 Context: {context} 
                 Answer:
                 """
+
+searchBot_template_prompt_zh="""
+                        你是一个有用的助手。请你回答所有问题。
+                        当问题是中文时，你也可以用中文回答。
+                        当问题是中文以外的语言时，你需要用英文回答。
+                        我们已经为你提供了一个搜索结果，当你认为你的答案结合聊天记录，与搜索结果完全不同时，请使用你的答案。
+                        当你认为你的答案与搜索结果相似时，请结合搜索结果和你的答案。
+                        必要时，你可以查看我们的聊天记录。
+                        question: {question}.
+                        chat_history:{chat_history}.
+                        search_result:{search_result}.
+                        """

@@ -1,9 +1,10 @@
 streamlit
 langchain-community
+streamlit-option-menu
 langchain
 langchain-groq
 python-dotenv
-st-pages
 BeautifulSoup4
 langchain_cohere
 chromadb
+duckduckgo-search

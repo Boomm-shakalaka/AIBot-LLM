@@ -1,0 +1,16 @@
+- name: Install wget
+  apt:
+    name: wget
+    state: present
+  become: true
+
+- name: Update apt-get update
+  apt:
+    update_cache: yes
+  become: true
+
+- name: Install curl
+  apt:
+    name: curl
+    state: present
+  become: true

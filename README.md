@@ -4,6 +4,59 @@
 ## 工具和平台
 Langchain, Streamlit, Oracle Cloud, Groq, Docker
 
+## 文件结构描述
+<pre>
+.
+├── ansible-script/        #Automation Orchestration
+│   ├── host_vars/
+│   │   └── config.yaml #Variable name
+|   ├── inventory/
+│   │   └── hosts.ini #host name
+│   ├── roles/ 
+│   │   ├── deploy-docker/tasks    #deploy docker yaml file  
+│   └── └── pre-install/tasks   #deploy related environment yaml file 
+├── README.md
+├── .gitgnore
+├── config_setting/
+│   ├── model_config.py
+│   └── prompt_config.py
+├── about_page.py
+├── chat_page.py
+├── Dockerfile
+├── pdf_page.py
+├── requirements.txt
+├── summary_page.py
+├── url_page.py
+</pre>
+
+## 使用教程
+### 本地部署
+1. 下载依赖库
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+2. 申请API key
+    
+    | API Key         | 网址                                            |
+    |----------------|-------------------------------------------------|
+    | Groq API KEY   | [Groq网页](https://console.groq.com/playground) |
+    | COHERE API KEY | [COHERE网页](https://dashboard.cohere.com/)     |
+
+3. 项目根目录建立.env
+    ```bash
+    GROQ_API_KEY=<Groq-API-KEY>
+    COHERE_API_KEY= <COHERE-API-KEY>
+    ```
+4. 运行
+    ```bash
+    streamlit run chat_page.py
+    ```
+### 服务器部署
+[wiki链接](https://github.com/Boomm-shakalaka/AIBot-LLM/wiki/Oracle%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B)
+
+
+
 ## 版本更新
 v0.0.3 (oracle cloud)
 1. 优化和完善URLBot检索能力

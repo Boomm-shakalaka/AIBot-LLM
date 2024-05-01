@@ -1,0 +1,34 @@
+- name: Ensure pip is installed  #docker需要pip
+  apt:
+    name: python-pip
+    state: present
+  become: true
+
+- name: Install docker
+  apt:
+    name: docker.io
+    state: present
+    update_cache: true
+
+- name: Check Docker installation
+  command: docker --version
+  register: docker_version
+  failed_when: "'Docker version' not in docker_version.stdout"
+
+- name: Install Docker Python library 
+  pip:
+    name: docker
+
+
+- name: Login to Docker registry
+  docker_login:
+    username: jiyuanc1@gmail.com
+    password: 87379472Jj321!
+
+# - name: Pull Docker image
+#   docker_image:
+#     name: jiyuanc1/aibot:v0.0.3
+#     source: pull
+
+
+

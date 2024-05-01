@@ -15,4 +15,4 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 EXPOSE 8501
 
 # 运行streamlit应用
-CMD ["streamlit", "run", "chat_page.py", "--server.port", "8501"]
+CMD ["streamlit", "run", "web_ui.py", "--server.port", "8501"]

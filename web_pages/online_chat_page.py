@@ -1,5 +1,5 @@
 import streamlit as st
-from config_setting import model_config,prompt_config
+from config_setting import prompt_config
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser

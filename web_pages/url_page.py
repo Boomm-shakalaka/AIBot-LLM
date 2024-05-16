@@ -1,5 +1,5 @@
 import streamlit as st
-from config_setting import model_config,prompt_config
+from config_setting import prompt_config
 import requests
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.messages import AIMessage, HumanMessage
@@ -50,30 +50,30 @@ class urlbot:
         return result
 
     def get_response(self,question):
-        # try:
-        '''get context'''
-        self.llm = ChatGroq(model_name=self.model_option,temperature=0,max_tokens=self.model_tokens)
-        query=self.generate_based_history_query(question,self.chat_history)
-        self.context = self.vectorstore.max_marginal_relevance_search(query=query, k=8)
-        '''get response'''
-        qa_system_prompt="""
-                        You need to answer User Questions based on Context.
-                        If the User Questions are asked in Chinese, then your answers must also be in Chinese.
-                        You can also use Chat History to help you understand User Questions.
-                        If you don't know the answer, just say that you don't know, don't try to make up an answer.
-                        Context: '''{context}'''
-                        User Questions: '''{question}'''
-                        Chat History: '''{chat_history}'''
-                        """
-        chain = PromptTemplate.from_template(qa_system_prompt) | self.llm | StrOutputParser()
+        try:
+            '''get context'''
+            self.llm = ChatGroq(model_name=self.model_option,temperature=0,max_tokens=self.model_tokens)
+            query=self.generate_based_history_query(question,self.chat_history)
+            self.context = self.vectorstore.max_marginal_relevance_search(query=query, k=8)
+            '''get response'''
+            qa_system_prompt="""
+                            You need to answer User Questions based on Context.
+                            If the User Questions are asked in Chinese, then your answers must also be in Chinese.
+                            You can also use Chat History to help you understand User Questions.
+                            If you don't know the answer, just say that you don't know, don't try to make up an answer.
+                            Context: '''{context}'''
+                            User Questions: '''{question}'''
+                            Chat History: '''{chat_history}'''
+                            """
+            chain = PromptTemplate.from_template(qa_system_prompt) | self.llm | StrOutputParser()
 
-        return chain.stream({
-                "chat_history":self.chat_history, 
-                "question": question,
-                "context": self.context
-            })
-        # except Exception as e:
-        #     return f"当前检索暂不可用，请在左侧栏更换模型，或者选择其他功能。"
+            return chain.stream({
+                    "chat_history":self.chat_history, 
+                    "question": question,
+                    "context": self.context
+                })
+        except Exception as e:
+            return f"当前检索暂不可用，请在左侧栏更换模型，或者选择其他功能。"
 
         
 def init_params(init_url_message):

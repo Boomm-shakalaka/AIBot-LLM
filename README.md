@@ -64,6 +64,7 @@ v0.0.4.1
 3. 增加url_page参考内容来源
 4. 新增headers内容，防止反爬
 5. 新增max tokens限制
+6. Gemma存在输出乱码问题
 
 v0.0.4 (oracle cloud)
 1. 使用streamlit_option_menu框架重构界面

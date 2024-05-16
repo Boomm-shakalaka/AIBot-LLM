@@ -58,6 +58,13 @@ Langchain, Streamlit, Oracle Cloud, Groq, Docker
 
 
 ## 版本更新
+v0.0.4.1
+1. 新增selenium爬虫，优化网页解析能力
+2. 优化urlbot架构
+3. 增加url_page参考内容来源
+4. 新增headers内容，防止反爬
+5. 新增max tokens限制
+
 v0.0.4 (oracle cloud)
 1. 使用streamlit_option_menu框架重构界面
 2. 新增在线搜索功能，基于duckduckDuckDuckGoSearch

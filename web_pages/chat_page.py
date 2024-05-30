@@ -1,9 +1,12 @@
+import random
 import streamlit as st
-from config_setting import prompt_config
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_groq import ChatGroq
+from langchain_community.chat_models import QianfanChatEndpoint
+from config_setting import model_config
+from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import find_dotenv, load_dotenv
 
 class chatbot:
@@ -15,8 +18,22 @@ class chatbot:
 
     def get_response(self,question,chat_history):
         try:
-            llm = ChatGroq(model_name=self.model_option,temperature=0.3,max_tokens=self.model_tokens)
-            prompt = ChatPromptTemplate.from_template(prompt_config.chatBot_template_prompt)
+            if self.model_option =='ERNIE-Lite-8K':
+                llm = QianfanChatEndpoint(model=self.model_option,temperature=0.7)
+            # elif self.model_option == 'gemini-1.5-flash-latest':
+            #     model_choice=random.choice(["gemini-1.5-flash-latest",'gemini-1.0-pro-001','gemini-1.5-pro-latest',"gemini-1.0-pro"])
+            #     llm = ChatGoogleGenerativeAI(model=model_choice,temperature=0.7)
+            else:
+                llm = ChatGroq(model_name=self.model_option,temperature=1,max_tokens=self.model_tokens)
+            chatBot_template_prompt="""
+                        You are a helpful assistant. Answer all questions to the best of your ability.
+                        If the User Questions are asked in Chinese, then your answers must also be in Chinese.
+                        You can also use Chat History to help you understand User Questions.
+                        If you don't know, you can ask for more information, or you can make some appropriate guesses.
+                        User Questions: {question}.
+                        Chat History:{chat_history}.
+                        """
+            prompt = ChatPromptTemplate.from_template(chatBot_template_prompt)
             chain = prompt | llm | StrOutputParser()
             # result=chain.invoke({
             #     "chat_history": chat_history,
@@ -44,17 +61,10 @@ def clear(init_chat_message):
 def chat_page():
     with st.sidebar:
         #模型选择
-        select_model=st.selectbox("选择模型",options=["Gemma","Llama3-70b","Llama3-8b","Mixtral"],index=0)
-        model_ls = {
-            "Gemma": {"name": "gemma-7b-it", "tokens": 8192, "developer": "Google"},
-            "Llama3-70b": {"name": "llama3-70b-8192", "tokens": 8192, "developer": "Meta"},
-            "Llama3-8b": {"name": "LLaMA3-8b-8192", "tokens": 8192, "developer": "Meta"},
-            "Mixtral": {"name": "mixtral-8x7b-32768", "tokens": 32768, "developer": "Mistral"},
-        }
-        model_option=model_ls[select_model]["name"]
-        model_tokes=model_ls[select_model]["tokens"]
-
-        st.button("Clear Chat History", on_click=lambda: clear(init_chat_message))
+        select_model=st.selectbox("选择模型",options=["百度千帆大模型","谷歌Gemma大模型","Llama3-70b大模型","Llama3-8b大模型","Mixtral大模型"],index=0)
+        model_option=model_config.model_ls[select_model]["name"]
+        model_tokes=model_config.model_ls[select_model]["tokens"]
+        st.button("清除聊天记录", on_click=lambda: clear(init_chat_message))
     #初始化消息
     init_chat_message = "您好，我是AI聊天机器人，我会尽力回答您的问题。\
                     此外在我的左侧栏中，您可以更换不同的AI模型。"

@@ -29,21 +29,21 @@ pages = {
         "icon": "bi-link-45deg",
         "func": url_page,
     },
-    # "PDF解析": {
-    #     "icon": "bi-filetype-pdf",
-    #     "func": pdf_page,
-    # },
+    "PDF解析": {
+        "icon": "bi-filetype-pdf",
+        "func": pdf_page,
+    },
 }
 
+with st.sidebar:
+    selected_page = option_menu(None,
+                            options= list(pages),
+                            icons=[pages[x]["icon"] for x in pages],
+                            default_index=0,
+                            orientation="vertical")
 
-selected_page = option_menu(None,
-                        options= list(pages),
-                        icons=[pages[x]["icon"] for x in pages],
-                        default_index=0,
-                        orientation="horizontal")
 
-
-# with st.sidebar:
+# 
 #     st.image('img/title.png')
 
 if selected_page in pages.keys():

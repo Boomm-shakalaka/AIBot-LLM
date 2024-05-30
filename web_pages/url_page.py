@@ -11,6 +11,10 @@ from langchain_cohere import CohereEmbeddings
 from url_crawler import url_to_text
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from config_setting import model_config
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_community.chat_models import QianfanChatEndpoint
+import random
 class urlbot:
     def __init__(self):
         load_dotenv(find_dotenv())
@@ -52,7 +56,10 @@ class urlbot:
     def get_response(self,question):
         try:
             '''get context'''
-            self.llm = ChatGroq(model_name=self.model_option,temperature=0,max_tokens=self.model_tokens)
+            if self.model_option =='ERNIE-Lite-8K':
+                self.llm = QianfanChatEndpoint(model=self.model_option,temperature=0.1)
+            else:
+                self.llm = ChatGroq(model_name=self.model_option,temperature=0.1,max_tokens=self.model_tokens)
             query=self.generate_based_history_query(question,self.chat_history)
             self.context = self.vectorstore.max_marginal_relevance_search(query=query, k=8)
             '''get response'''
@@ -124,15 +131,9 @@ def url_page():
     #左侧栏
     with st.sidebar:
         #模型选择
-        select_model=st.selectbox("选择模型",options=["Gemma","Llama3-70b","Llama3-8b","Mixtral"],index=0)
-        model_ls = {
-            "Gemma": {"name": "gemma-7b-it", "tokens": 8192, "developer": "Google"},
-            "Llama3-70b": {"name": "llama3-70b-8192", "tokens": 8192, "developer": "Meta"},
-            "Llama3-8b": {"name": "LLaMA3-8b-8192", "tokens": 8192, "developer": "Meta"},
-            "Mixtral": {"name": "mixtral-8x7b-32768", "tokens": 32768, "developer": "Mistral"},
-        }
-        model_option=model_ls[select_model]["name"]
-        model_tokes=model_ls[select_model]["tokens"]
+        select_model=st.selectbox("选择模型",options=["百度千帆大模型","谷歌Gemma大模型","谷歌gemini大模型","Llama3-70b大模型","Llama3-8b大模型","Mixtral大模型"],index=0)
+        model_option=model_config.model_ls[select_model]["name"]
+        model_tokes=model_config.model_ls[select_model]["tokens"]
 
         #清除聊天记录
         st.button("清除记录", on_click=lambda: clear(init_url_message))

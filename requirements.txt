@@ -8,8 +8,5 @@ BeautifulSoup4
 langchain_cohere
 chromadb
 duckduckgo-search
-selenium
-# webdriver-manager
-playwright
-# playwright install
-lxml
+langchain-google-genai
+pdfminer.six

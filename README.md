@@ -1,8 +1,8 @@
 ### 基于LLM大模型的AI机器人
-一套基于开源框架、平台的AI语言模型机器人，集成人机对话，信息检索生成，PDF和URL解析对话等功能。
+一套基于开源框架、平台的AI语言模型机器人，集成人机对话，信息检索生成，PDF和URL解析对话等功能。全部采用免费开源API，以最低成本实现LLM定制化功能。
 
 ## 工具和平台
-Langchain, Streamlit, Oracle Cloud, Groq, Docker
+Langchain, Streamlit, Oracle Cloud, Groq, Docker, Baidu Cloud
 
 ## 文件结构描述
 <pre>
@@ -18,7 +18,7 @@ Langchain, Streamlit, Oracle Cloud, Groq, Docker
 ├── README.md
 ├── .gitgnore
 ├── config_setting/
-│   ├── model_config.py
+│   ├── model_config.py  #all models
 │   └── prompt_config.py
 ├── about_page.py
 ├── chat_page.py
@@ -26,7 +26,7 @@ Langchain, Streamlit, Oracle Cloud, Groq, Docker
 ├── pdf_page.py
 ├── requirements.txt
 ├── summary_page.py
-├── url_page.py
+├── url_page.py   #ui
 </pre>
 
 ## 使用教程
@@ -42,15 +42,20 @@ Langchain, Streamlit, Oracle Cloud, Groq, Docker
     |----------------|-------------------------------------------------|
     | Groq API KEY   | [Groq网页](https://console.groq.com/playground) |
     | COHERE API KEY | [COHERE网页](https://dashboard.cohere.com/)     |
+    | Gemini API KEY | [谷歌云网页](https://ai.google.dev/) |
+    | BaiduQianfan API KEY | [百度智能云网页](https://cloud.baidu.com/) |
 
 3. 项目根目录建立.env
     ```bash
-    GROQ_API_KEY=<Groq-API-KEY>
+    GROQ_API_KEY= <Groq-API-KEY>
     COHERE_API_KEY= <COHERE-API-KEY>
+    GOOGLE_API_KEY= <GOOGLE-API-KEY>
+    QIANFAN_AK= <QIANFAN-AK>
+    QIANFAN_SK= <QIANFAN-SK>
     ```
 4. 运行
     ```bash
-    streamlit run chat_page.py
+    streamlit run web_ui.py
     ```
 ### 服务器部署
 [wiki链接](https://github.com/Boomm-shakalaka/AIBot-LLM/wiki/Oracle%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B)
@@ -58,6 +63,13 @@ Langchain, Streamlit, Oracle Cloud, Groq, Docker
 
 
 ## 版本更新
+v0.0.5
+1. 新增百度千帆大模型(ERNIE-Lite-8K和ERNIE-Speed-128K免费开放)
+2. 新增gemini模型(gemini模型不支持streaming输出，暂未开放)
+3. 新增online chat功能，使用duckduck-search进行在线搜索
+4. 优化在线搜索调用方式
+5. 实现pdf chat功能中的简历评估功能
+
 v0.0.4.1
 1. 新增selenium爬虫，优化网页解析能力
 2. 优化urlbot架构
@@ -91,8 +103,6 @@ v0.0.2
 3. 构建URLPage网页基本框架
 4. 新增URLBot，可以根据URL进行检索
 5. 优化URL解析动画
-
-
 
 v0.0.1
 1. 构建Streamlit网页基本框架

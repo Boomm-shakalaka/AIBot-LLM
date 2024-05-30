@@ -32,29 +32,31 @@ def url_to_text(url):
             dynamic_divs = driver.find_elements(By.CSS_SELECTOR, "div")
             text_content += dynamic_divs[i].text
     driver.quit()
+    # data = [Document(page_content=format_text(text_content))]
     data = [Document(page_content=format_text(text_content))]
 
     return data
 
 
 def format_text(text):
-    # Replace all occurrences of two or more consecutive tab characters with a single tab
+    # 用正则表达式将连续多个制表符替换为一个制表符
     text = re.sub(r'\t+', '\t', text)
-    # Replace all occurrences of three or more consecutive newline characters with exactly two newlines
-    text = re.sub(r'\n+', '\n\n', text)
-    # Remove extra spaces
+    # 用正则表达式将连续多个空格替换为一个空格
     text = re.sub(r' +', ' ', text)
-    # Return the formatted text
+    # 用正则表达式将多个换行符和空白字符的组合替换为一个换行符
+    text = re.sub(r'\n\s*\n+', '\n', text)
+    # 用正则表达式将单个换行符和空白字符的组合替换为一个换行符
+    text = re.sub(r'\n\s+', '\n', text)
     return text
 
 if __name__ == '__main__':
     data_ls=[]
-    data_ls,links_ls = url_to_text('https://edition.cnn.com/')
-    for link in links_ls[5:8]:
-        new_text,new_links_ls = url_to_text(link)
-        print(len(new_text[0].page_content))
-        data_ls.extend(new_text)
-    # print(data_ls)
+    data_ls = url_to_text('https://edition.cnn.com/')
+    # for link in links_ls[5:8]:
+    #     new_text,new_links_ls = url_to_text(link)
+    #     print(len(new_text[0].page_content))
+    #     data_ls.extend(new_text)
+    print(data_ls)
 
 
 

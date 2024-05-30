@@ -5,7 +5,7 @@
 Langchain, Streamlit, Oracle Cloud, Groq, Docker, Baidu Cloud
 
 ## DEMO链接
-[Link](168.138.28.54:8501)
+[Link](http://168.138.28.54:8501)
 ## 文件结构描述
 <pre>
 .

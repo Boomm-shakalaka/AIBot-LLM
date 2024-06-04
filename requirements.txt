@@ -10,3 +10,4 @@ chromadb
 duckduckgo-search
 langchain-google-genai
 pdfminer.six
+selenium

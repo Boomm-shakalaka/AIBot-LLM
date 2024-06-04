@@ -1,5 +1,6 @@
 model_ls = {
-    "百度千帆大模型": {"name": "ERNIE-Lite-8K", "tokens": 8192, "developer": "Baidu"},
+    "百度千帆大模型-8k": {"name": "ERNIE-Lite-8K", "tokens": 8192, "developer": "Baidu"},
+    "百度千帆大模型-128k": {"name": "ERNIE-speed-128k", "tokens": 128000, "developer": "Baidu"},
     "谷歌Gemma大模型": {"name": "gemma-7b-it", "tokens": 8192, "developer": "Google"},
     "谷歌gemini大模型":{"name": "gemini-1.5-flash-latest", "tokens": 8192, "developer": "Google"},
     "Llama3-70b大模型": {"name": "llama3-70b-8192", "tokens": 8192, "developer": "Meta"},

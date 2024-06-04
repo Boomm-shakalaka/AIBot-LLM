@@ -1,8 +1,11 @@
 ### 基于LLM大模型的AI机器人
-一套基于开源框架、平台的AI语言模型机器人，集成人机对话，信息检索生成，PDF和URL解析对话等功能。全部采用免费开源API，以最低成本实现LLM定制化功能。
+一款开源的AI语言模型机器人，集成人机对话，信息检索生成，PDF和URL解析对话等功能。该平台优势为全部采用免费开源API，以最低成本实现LLM定制化功能。
 
 ## 工具和平台
-Langchain, Streamlit, Oracle Cloud, Groq, Docker, Baidu Cloud
+Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
+
+## DEMO链接
+[Link](http://168.138.28.54:8501)
 
 ## 文件结构描述
 <pre>
@@ -19,17 +22,76 @@ Langchain, Streamlit, Oracle Cloud, Groq, Docker, Baidu Cloud
 ├── .gitgnore
 ├── config_setting/
 │   ├── model_config.py  #all models
-│   └── prompt_config.py
-├── about_page.py
-├── chat_page.py
+│   └── prompt_config.py  #all prompts
+├── test.py   #test cases
+├── cralwer_modules.py
+├── ui_images
+├── web_pages/
+│   ├── about_page.py
+│   ├── chat_page.py
+│   ├── online_chat_page.py
+│   ├── pdf_page.py
+│   └── url_page.py
 ├── Dockerfile
-├── pdf_page.py
 ├── requirements.txt
-├── summary_page.py
-├── url_page.py   #ui
+├── web_ui.py   # main interface
 </pre>
 
+以下是优化后的Markdown写法：
+
+## 功能描述
+
+### Crawler爬虫模块
+
+*  该模块主要包含三种爬虫方法: [Selenium](https://selenium-python.readthedocs.io/)，[Playwright](https://playwright.dev/python/docs/intro)，[基于Langchain的DuckDuckGo](https://api.python.langchain.com/en/latest/tools/langchain_community.tools.ddg_search.tool.DuckDuckGoSearchResults.html)。
+
+*  实验显示，Playwright的耗时只有Selenium的一半：
+    | 模块              | 时间          |
+    |-------------------|---------------|
+    | selenium_url_crawler   | 27s       |
+    | playwright_url_crawler | 11s       |
+
+*  由于Streamlit和Playwright的同步方式会产生冲突，所以应使用异步方法。 [参考](https://discuss.streamlit.io/t/using-playwright-with-streamlit/28380/5)
+
+### Chat模块 (在线和离线)
+
+1. 离线对话
+   - 调用LLM大模型
+   - 保留对话记录，便于后续分析与应用
+
+2. 在线对话流程
+   - 判断是否需要搜索引擎
+     - 如果不需要，直接执行离线对话流程
+     - 如果需要，则继续下一步
+   - 生成用于搜索的query
+     - 调用DuckDuckGo或使用自动化爬虫爬取Google搜索页面内容
+     - 基于对话记录和搜索结果，综合分析并回答问题
+
+### LLM大模型模块
+
+以下是支持的LLM大模型：
+
+| 模型名称                 | tokens  | 开发者   |   平台|
+|-------------------------|---------|----------| ----------|   
+| ERNIE-Lite-8K           | 8192    | Baidu    | Baidu Cloud    |
+| ERNIE-speed-128K        | 128k  | Baidu    | Baidu Cloud     |
+| Gemma-7B-IT             | 8192    | Google   | Groq    |
+| Gemini-1.5-Flash-Latest | 8192    | Google   | Google Cloud    |
+| Llama3-70B-8192         | 8192    | Meta     | Groq    |
+| Llama3-8B-8192          | 8192    | Meta     | Groq    |
+| Mixtral-8x7B-32768      | 32768   | Mistral  | Groq    |
+
+### URL检索模块
+
+1. 基于 [Langchain-RAG检索生成方法](https://python.langchain.com/v0.1/docs/get_started/introduction/)。
+2. 检索流程:
+    1. 输入URL并判断是否正确。
+    2. 爬虫URL网页内容，生成向量嵌入（当前使用CohereEmbeddings嵌入API）。
+    3. 根据问题检索top_k个相关文档。
+    4. 基于文档内容回答问题。
+
 ## 使用教程
+
 ### 本地部署
 1. 下载依赖库
     ```bash
@@ -55,14 +117,27 @@ Langchain, Streamlit, Oracle Cloud, Groq, Docker, Baidu Cloud
     ```
 4. 运行
     ```bash
+    play playwright install
+    ```
+    ```bash
     streamlit run web_ui.py
     ```
 ### 服务器部署
-[wiki链接](https://github.com/Boomm-shakalaka/AIBot-LLM/wiki/Oracle%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B)
+1. [Docker链接](https://hub.docker.com/repository/docker/jiyuanc1/aibot/general)
+2. 服务器部署教程：[wiki链接](https://github.com/Boomm-shakalaka/AIBot-LLM/wiki/Oracle%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B)
 
+## 版本更新记录
+v1.0.0 (oracle cloud)
+1. 优化pdf chat功能中的简历评估功能，增加对话
+2. 新增playwright爬虫模块，优化异步调用
+3. 新增url chat爬虫模块调用和来源检索选择功能
+4. 实现基于playwright在线搜索功能
+5. 优化chat history
+6. 整合cralwer模块
+7. 整合prompt配置内容
+8. 页面美化
+9. 新增about页面
 
-
-## 版本更新
 v0.0.5
 1. 新增百度千帆大模型(ERNIE-Lite-8K和ERNIE-Speed-128K免费开放)
 2. 新增gemini模型(gemini模型不支持streaming输出，暂未开放)
@@ -78,18 +153,18 @@ v0.0.4.1
 5. 新增max tokens限制
 6. Gemma存在输出乱码问题
 
-v0.0.4 (oracle cloud)
+v0.0.4
 1. 使用streamlit_option_menu框架重构界面
 2. 新增在线搜索功能，基于duckduckDuckDuckGoSearch
 3. 优化异步方法处理搜索功能
 4. 新增搜索agent提示词
 
-v0.0.3 (oracle cloud)
+v0.0.3
 1. 优化和完善URLBot检索能力
 2. 优化和完善URLPage网页架构
 3. 使用Cohere API进行Embedding
 
-v0.0.2.1 (oracle cloud)
+v0.0.2.1
 1. 优化侧边栏架构
 2. 优化chatbot对话能力，优化prompt
 3. 优化chatbot对话体验，更改为streaming输出流模式

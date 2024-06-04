@@ -4,6 +4,7 @@ from web_pages.chat_page import chat_page
 from web_pages.url_page import url_page
 from web_pages.pdf_page import pdf_page
 from web_pages.online_chat_page import online_chat_page
+from web_pages.about_page import about_page
     
 st.set_page_config(
     page_title="AIBot",
@@ -33,18 +34,20 @@ pages = {
         "icon": "bi-filetype-pdf",
         "func": pdf_page,
     },
+    "关于About": {
+        "icon": "bi-file-person",
+        "func": about_page,
+    },
 }
 
 with st.sidebar:
-    selected_page = option_menu(None,
+    st.image("ui_images/main.png", width=100)
+    selected_page = option_menu(menu_title='功能选择',
                             options= list(pages),
                             icons=[pages[x]["icon"] for x in pages],
                             default_index=0,
                             orientation="vertical")
-
-
-# 
-#     st.image('img/title.png')
+    
 
 if selected_page in pages.keys():
     pages[selected_page]["func"]()

@@ -1,5 +1,6 @@
 import asyncio
 import os
+import sys
 import streamlit as st
 from config_setting import prompt_config,model_config
 import requests
@@ -13,7 +14,7 @@ import crawler_modules
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from config_setting import model_config
-from langchain_google_genai import ChatGoogleGenerativeAI
+# from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.chat_models import QianfanChatEndpoint
 
 class urlbot:
@@ -61,8 +62,8 @@ class urlbot:
                     "question": question,
                     "context": self.context
                 })
-            # result=chain.invoke({"chat_history":chat_history, "question": question,"context": self.context})
-            # return result
+                # result=chain.invoke({"chat_history":chat_history, "question": question,"context": self.context})
+                # return result
         except Exception as e:
             return f"当前检索暂不可用，请在左侧栏更换模型，或者选择其他功能。"
 
@@ -103,28 +104,33 @@ def clear():
 def url_parser(url, select_crawler):
     parse_flag = False
     docs = ''
-    try:
-        if select_crawler == "Selenium":
-            docs = crawler_modules.selenium_url_crawler(url)
-        else:
-            loop = asyncio.ProactorEventLoop()
+    # try:
+    if select_crawler == "Selenium":
+        docs = crawler_modules.selenium_url_crawler(url)
+    else:
+        sys_type=sys.platform
+        if sys_type == "win32":
+            loop = asyncio.ProactorEventLoop()#windows系统
             docs = loop.run_until_complete(crawler_modules.playwright_crawler_async(url))
-        if len(docs[0].page_content) < 100:#判断是否解析成功
-            return docs, parse_flag
-        parse_flag = True
+        else:
+            loop = asyncio.SelectorEventLoop()#linux系统
+            docs = loop.run_until_complete(crawler_modules.playwright_crawler_async(url))
+    if len(docs[0].page_content) < 100:#判断是否解析成功
         return docs, parse_flag
-    except Exception as e:
-        return docs, parse_flag
+    parse_flag = True
+    return docs, parse_flag
+    # except Exception as e:
+    #     return docs, parse_flag
 
 def retrieve_data(docs):
-    try:
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size = 1000,chunk_overlap = 200)
-        splits = text_splitter.split_documents(docs)
-        embeddings = CohereEmbeddings(model="embed-multilingual-v3.0")
-        vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
-        return vectorstore
-    except Exception as e:
-        return f"当前文本嵌入向量处理产生问题，请稍后重试，或者选择其他AI功能"
+    # try:
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size = 1000,chunk_overlap = 200)
+    splits = text_splitter.split_documents(docs)
+    embeddings = CohereEmbeddings(model="embed-multilingual-v3.0")
+    vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
+    return vectorstore
+    # except Exception as e:
+    #     return f"当前文本嵌入向量处理产生问题，请稍后重试，或者选择其他AI功能"
 def url_page():
     init_params()
     '''页面布局'''

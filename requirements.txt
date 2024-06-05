@@ -8,6 +8,10 @@ BeautifulSoup4
 langchain_cohere
 chromadb
 duckduckgo-search
-langchain-google-genai
+qianfan
+asyncio
+webdriver-manager
+# langchain-google-genai
 pdfminer.six
 selenium
+playwright

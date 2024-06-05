@@ -40,9 +40,9 @@ def about_page():
         * [Bootstrap官网](https://getbootstrap.com/)
 
         作者：Boomm-shakalaka  
-        版本：1.0  
+        版本：1.1  
         Github项目地址：[AIBot-LLM](https://github.com/Boomm-shakalaka/AIBot-LLM)  
-        '报告Bug'：[Github Issues](https://github.com/Boomm-shakalaka/AIBot-LLM/issues)
+        报告Bug：[Github Issues](https://github.com/Boomm-shakalaka/AIBot-LLM/issues)
         """
     )
             

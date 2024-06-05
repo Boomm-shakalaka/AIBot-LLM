@@ -1,5 +1,6 @@
 import asyncio
 import re
+import sys
 from bs4 import BeautifulSoup
 import requests
 from langchain_core.documents import Document
@@ -169,10 +170,13 @@ async def playwright_crawler_async(url):
 
 def selenium_url_crawler(url):
     options = Options()
-    options.add_argument('--headless')
+    options.add_argument("--headless")  # Run Chrome in headless mode
+    options.add_argument("--no-sandbox")  # Bypass OS security model
+    options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
     # options.add_argument('--window-size=1920x1080')
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver = webdriver.Chrome(options=options)
     driver.get(url)
     # time.sleep(2) 
 
@@ -241,7 +245,10 @@ if __name__ == '__main__':
     # print(data_playwright)
 
     '''playwright_async'''
-    # loop = asyncio.ProactorEventLoop()
+    # if sys.platform == "win32":
+    #     loop = asyncio.ProactorEventLoop()
+    # else:
+    #     loop = asyncio.SelectorEventLoop()
     # data_playwright_async = loop.run_until_complete(playwright_crawler_async('https://www.google.com/search?q=墨尔本天气'))
     # print(data_playwright_async)
 
@@ -249,8 +256,11 @@ if __name__ == '__main__':
     # data_sync = google_search_sync(question)
     # print(data_sync)
 
-    '''google_search_async'''
-    loop = asyncio.ProactorEventLoop()
+    '''google_search_async'''                
+    if sys.platform == "win32":
+        loop = asyncio.ProactorEventLoop()
+    else:
+        loop = asyncio.SelectorEventLoop()
     data_async = loop.run_until_complete(google_search_async(question))
     print(data_async)
 

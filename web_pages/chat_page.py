@@ -6,23 +6,36 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_groq import ChatGroq
 from langchain_community.chat_models import QianfanChatEndpoint
 from config_setting import model_config,prompt_config
-from langchain_google_genai import ChatGoogleGenerativeAI
+# from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import find_dotenv, load_dotenv
 
 class chatbot:
     def __init__(self):
+        """
+        初始化ChatBot类的实例，加载环境变量并设置模型选项和令牌数。
+        """
         load_dotenv(find_dotenv())#加载环境变量
         self.model_option = None
         self.model_tokens = None
         self.llm = None
 
     def get_response(self,question,chat_history):
+        """
+        根据用户的问题和对话历史获取响应。
+
+        Parameters:
+        question (str): 用户的问题。
+        chat_history (list): 对话历史列表。
+
+        Returns:
+        str或generator: 如果使用流式输出，返回一个生成器对象；否则返回一个字符串。
+        """
         try:
             if self.model_option =='ERNIE-Lite-8K' or self.model_option=='ERNIE-speed-128k': #选择百度千帆大模型
                 self.llm = QianfanChatEndpoint(model=self.model_option)
-            elif self.model_option == 'gemini-1.5-flash-latest': #选择谷歌Gemma大模型,不支持流式输出暂未使用
-                model_choice=random.choice(["gemini-1.5-flash-latest",'gemini-1.0-pro-001','gemini-1.5-pro-latest',"gemini-1.0-pro"])
-                self.llm = ChatGoogleGenerativeAI(model=model_choice,temperature=0.7)#ChatGoogleGenerativeAI模型
+            # elif self.model_option == 'gemini-1.5-flash-latest': #选择谷歌Gemma大模型,不支持流式输出暂未使用
+            #     model_choice=random.choice(["gemini-1.5-flash-latest",'gemini-1.0-pro-001','gemini-1.5-pro-latest',"gemini-1.0-pro"])
+            #     self.llm = ChatGoogleGenerativeAI(model=model_choice,temperature=0.7)#ChatGoogleGenerativeAI模型
             else:
                 self.llm = ChatGroq(model_name=self.model_option,temperature=0.5,max_tokens=self.model_tokens)#ChatGroq模型
             prompt = ChatPromptTemplate.from_template(prompt_config.chatbot_prompt)
@@ -37,13 +50,24 @@ class chatbot:
             return f"当前模型{self.model_option}暂不可用，请在左侧栏选择其他模型。"
         
 def init_params():
+    """
+    初始化会话状态参数。
+
+    如果会话状态中不存在"chat_message"键，则创建一个空列表并将其赋值给"chat_message"。
+    如果会话状态中不存在"chat_bot"键，则创建一个新的ChatBot实例并将其赋值给"chat_bot"。
+    """
     if "chat_message" not in st.session_state:
         st.session_state.chat_message = []
     if "chat_bot" not in st.session_state:
         st.session_state.chat_bot = chatbot()
         
-#清除聊天记录
 def clear():
+    """
+    清除会话状态中的聊天记录和模型实例。
+
+    将会话状态中的"chat_message"键对应的值重置为空列表。
+    创建一个新的ChatBot实例并将其赋值给"chat_bot"键。
+    """
     st.session_state.chat_message = [] #清除聊天记录
     st.session_state.chat_bot = chatbot() #重新初始化模型
 

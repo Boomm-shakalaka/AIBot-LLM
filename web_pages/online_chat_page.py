@@ -1,4 +1,5 @@
 import asyncio
+import sys
 import streamlit as st
 from config_setting import prompt_config
 from langchain_core.messages import AIMessage, HumanMessage
@@ -13,12 +14,25 @@ import crawler_modules
 
 class SearchBot:
     def __init__(self):
+        """
+        初始化SearchBot类的实例，加载环境变量并设置模型选项和令牌数。
+        """
         load_dotenv(find_dotenv())#加载环境变量.env
         self.model_option = None
         self.model_tokens = None
         self.content=None
 
     def generate_based_history_query(self,question,chat_history):
+        """
+        根据问题和对话历史生成搜索查询。
+
+        Parameters:
+        question (str): 用户的问题。
+        chat_history (list): 对话历史列表。
+
+        Returns:
+        str: 生成的搜索查询。
+        """ 
         prompt=PromptTemplate.from_template(prompt_config.query_generated_prompt)
         rag_chain = prompt | self.llm | StrOutputParser()
         result=rag_chain.invoke(
@@ -30,6 +44,16 @@ class SearchBot:
         return result
     
     def judge_search(self,question,chat_history):
+        """
+        判断是否需要进行搜索。
+
+        Parameters:
+        question (str): 用户的问题。
+        chat_history (list): 对话历史列表。
+
+        Returns:
+        str: 判断结果。
+        """
         judge_model=QianfanChatEndpoint(model='ERNIE-Lite-8K')
         prompt = PromptTemplate.from_template(prompt_config.judge_search_prompt)
         chain = prompt | judge_model | StrOutputParser()
@@ -40,6 +64,17 @@ class SearchBot:
         return response
     
     def get_response(self, question,select_search_type,chat_history):
+        """
+        根据用户的问题和对话历史获取响应。
+
+        Parameters:
+        question (str): 用户的问题。
+        select_search_type (str): 选择的搜索类型。
+        chat_history (list): 对话历史列表。
+
+        Returns:
+        str或generator: 如果使用流式输出，返回一个生成器对象；否则返回一个字符串。
+        """   
         if self.model_option =='ERNIE-Lite-8K' or self.model_option=='ERNIE-speed-128k': #选择百度千帆大模型
             self.llm = QianfanChatEndpoint(model=self.model_option)
         else:
@@ -51,7 +86,11 @@ class SearchBot:
                 if select_search_type=="duckduckgo":
                     self.content=crawler_modules.duckduck_search(query)
                 else:
-                    loop = asyncio.ProactorEventLoop()#创建事件循环，用于playwright异步搜索
+                    sys_type=sys.platform
+                    if sys_type == "win32":
+                        loop = asyncio.ProactorEventLoop()#windows系统
+                    else:
+                        loop = asyncio.SelectorEventLoop()#linux系统
                     self.content = loop.run_until_complete(crawler_modules.google_search_async(query))#异步搜索
                 prompt = ChatPromptTemplate.from_template(prompt_config.searchbot_prompt)
                 chain = prompt | self.llm | StrOutputParser()
@@ -71,6 +110,12 @@ class SearchBot:
             return f"当前模型{self.model_option}暂不可用，请在左侧栏选择其他模型。"
 
 def init_params():
+    """
+    初始化会话状态参数。
+
+    如果会话状态中不存在"search_message"键，则创建一个空列表并将其赋值给"search_message"。
+    如果会话状态中不存在"searchbot"键，则创建一个新的SearchBot实例并将其赋值给"searchbot"。
+    """
     if "search_message" not in st.session_state:
         st.session_state.search_message=[]
     if "searchbot" not in st.session_state:
@@ -78,6 +123,12 @@ def init_params():
 
 
 def clear():
+    """
+    清除会话状态中的搜索记录和SearchBot实例。
+
+    将会话状态中的"search_message"键对应的值重置为空列表。
+    创建一个新的SearchBot实例并将其赋值给"searchbot"键。
+    """
     st.session_state.search_message = []
     st.session_state.search_bot = SearchBot()
 

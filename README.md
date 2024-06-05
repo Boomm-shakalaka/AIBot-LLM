@@ -1,4 +1,4 @@
-### 基于LLM大模型的AI机器人
+# 基于LLM大模型的AI机器人
 一款开源的AI语言模型机器人，集成人机对话，信息检索生成，PDF和URL解析对话等功能。该平台优势为全部采用免费开源API，以最低成本实现LLM定制化功能。
 
 ## 工具和平台
@@ -7,8 +7,6 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
 ## DEMO链接
 [Link](http://168.138.28.54:8501)
 
-## DEMO链接
-[Link](http://168.138.28.54:8501)
 ## 文件结构描述
 <pre>
 .
@@ -39,11 +37,11 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
 ├── web_ui.py   # main interface
 </pre>
 
-以下是优化后的Markdown写法：
 
 ## 功能描述
 
 ### Crawler爬虫模块
+
 
 *  该模块主要包含三种爬虫方法: [Selenium](https://selenium-python.readthedocs.io/)，[Playwright](https://playwright.dev/python/docs/intro)，[基于Langchain的DuckDuckGo](https://api.python.langchain.com/en/latest/tools/langchain_community.tools.ddg_search.tool.DuckDuckGoSearchResults.html)。
 
@@ -53,7 +51,8 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
     | selenium_url_crawler   | 27s       |
     | playwright_url_crawler | 11s       |
 
-*  由于Streamlit和Playwright的同步方式会产生冲突，所以应使用异步方法。 [参考](https://discuss.streamlit.io/t/using-playwright-with-streamlit/28380/5)
+*  由于Streamlit和Playwright的同步方式会产生冲突，所以应使用异步方法。[参考](https://discuss.streamlit.io/t/using-playwright-with-streamlit/28380/5)
+
 
 ### Chat模块 (在线和离线)
 
@@ -92,6 +91,13 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
     3. 根据问题检索top_k个相关文档。
     4. 基于文档内容回答问题。
 
+### PDF解析模块
+1. 基于[Streamlit-PDF-API](https://discuss.streamlit.io/t/display-pdf-in-streamlit/62274)和[Langchain-PDFMinerLoader](https://api.python.langchain.com/en/latest/document_loaders/langchain_community.document_loaders.pdf.PDFMinerLoader.html)
+2. 使用流程:
+    1. 上传PDF
+    2. 解析PDF内容大模型基于prompt总结PDF
+    3. 根据问题和PDF内容进行回答
+
 ## 使用教程
 
 ### 本地部署
@@ -125,11 +131,37 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
     streamlit run web_ui.py
     ```
 ### 服务器部署
-1. [Docker链接](https://hub.docker.com/repository/docker/jiyuanc1/aibot/general)
-2. 服务器部署教程：[wiki链接](https://github.com/Boomm-shakalaka/AIBot-LLM/wiki/Oracle%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B)
+方法一:  Linux环境本地安装和执行Docker
+* 服务器拉取github仓库
+* 构建镜像
+
+方法二:  Docker Hub拉取和执行镜像
+* [Docker Hub链接](https://hub.docker.com/repository/docker/jiyuanc1/aibot/general)
+
+部署教程
+* 服务器部署教程：[wiki链接](https://github.com/Boomm-shakalaka/AIBot-LLM/wiki/Oracle%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B)
+
+## Docker构建镜像已知问题
+1. Google-genai打包失败,没有找到该问题原因
+    ```bash
+    ERROR: Could not find a version that satisfies the requirement langchain-google-genai (from -r requirements.txt (line 11)) (from >versions: none) 
+    ERROR: No matching distribution found for langchain-google-genai (from -r requirements.txt (line 11))
+    ```
+2. 对于windows和linux 不同操作系统，异步方法也不同 [参考](https://stackoverflow.com/questions/67964463/what-are-selectoreventloop-and-proactoreventloop-in-python-asyncio)
+    ```python
+    if sys.platform == "win32":
+        loop = asyncio.ProactorEventLoop() #windows系统
+    else:
+        loop = asyncio.SelectorEventLoop()#linux系统
+    ```
+3. playwright无法直接打包进Docker! 需要基于Ubuntu镜像环境[参考](https://stackoverflow.com/questions/72181737/issue-running-playwright-python-in-docker-container)
+
 
 ## 版本更新记录
-v1.0.0 (oracle cloud)
+v1.0.1 (oracle)
+1. 解决Docker构建镜像问题，解决不同操作系统存在的异步方法
+
+v1.0.0 
 1. 优化pdf chat功能中的简历评估功能，增加对话
 2. 新增playwright爬虫模块，优化异步调用
 3. 新增url chat爬虫模块调用和来源检索选择功能
@@ -139,6 +171,7 @@ v1.0.0 (oracle cloud)
 7. 整合prompt配置内容
 8. 页面美化
 9. 新增about页面
+10. 更新Dockerfile
 
 v0.0.5
 1. 新增百度千帆大模型(ERNIE-Lite-8K和ERNIE-Speed-128K免费开放)

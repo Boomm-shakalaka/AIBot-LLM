@@ -1,13 +1,15 @@
-# 基于LLM大模型的AI机器人
+# 基于LLM大模型的AI机器人 AI-Robot Based on LLM
 一款开源的AI语言模型机器人，集成人机对话，信息检索生成，PDF和URL解析对话等功能。该平台优势为全部采用免费开源API，以最低成本实现LLM定制化功能。
 
-## 工具和平台
+An open source AI language model robot that integrates human-machine dialogue, information retrieval generation, PDF and URL parsing and other functions. The advantage of the platform is that all the free open source apis are used to achieve LLM customization functions at the lowest cost.
+
+## 工具和平台 Tools and Platform
 Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
 
-## DEMO链接
+## 展示链接 Demo Link
 [Link](http://168.138.28.54:8501)
 
-## 文件结构描述
+## 文件结构描述 File Structure Description
 <pre>
 .
 ├── ansible-script/        #Automation Orchestration
@@ -38,9 +40,9 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
 </pre>
 
 
-## 功能描述
+## 功能描述 functional Description
 
-### Crawler爬虫模块
+### 爬虫模块 Crawler Modules
 
 
 *  该模块主要包含三种爬虫方法: [Selenium](https://selenium-python.readthedocs.io/)，[Playwright](https://playwright.dev/python/docs/intro)，[基于Langchain的DuckDuckGo](https://api.python.langchain.com/en/latest/tools/langchain_community.tools.ddg_search.tool.DuckDuckGoSearchResults.html)。
@@ -54,7 +56,7 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
 *  由于Streamlit和Playwright的同步方式会产生冲突，所以应使用异步方法。[参考](https://discuss.streamlit.io/t/using-playwright-with-streamlit/28380/5)
 
 
-### Chat模块 (在线和离线)
+### 对话模块 (基于在线和离线两种方式) Chat Modules (Online and Offline)
 
 1. 离线对话
    - 调用LLM大模型
@@ -68,7 +70,7 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
      - 调用DuckDuckGo或使用自动化爬虫爬取Google搜索页面内容
      - 基于对话记录和搜索结果，综合分析并回答问题
 
-### LLM大模型模块
+### 大语言模型模块 Large Language Model Modules
 
 以下是支持的LLM大模型：
 
@@ -82,8 +84,8 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
 | Llama3-8B-8192          | 8192    | Meta     | Groq    |
 | Mixtral-8x7B-32768      | 32768   | Mistral  | Groq    |
 
-### URL检索模块
-
+### URL检索模块 URL Retrieval Modules
+ 
 1. 基于 [Langchain-RAG检索生成方法](https://python.langchain.com/v0.1/docs/get_started/introduction/)。
 2. 检索流程:
     1. 输入URL并判断是否正确。
@@ -91,16 +93,16 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
     3. 根据问题检索top_k个相关文档。
     4. 基于文档内容回答问题。
 
-### PDF解析模块
+### PDF解析模块 PDF Parsing Modules
 1. 基于[Streamlit-PDF-API](https://discuss.streamlit.io/t/display-pdf-in-streamlit/62274)和[Langchain-PDFMinerLoader](https://api.python.langchain.com/en/latest/document_loaders/langchain_community.document_loaders.pdf.PDFMinerLoader.html)
 2. 使用流程:
     1. 上传PDF
     2. 解析PDF内容大模型基于prompt总结PDF
     3. 根据问题和PDF内容进行回答
 
-## 使用教程
+## 使用教程 Tutorial
 
-### 本地部署
+### 本地部署 Local Deployment
 1. 下载依赖库
     ```bash
     pip install -r requirements.txt
@@ -130,7 +132,7 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
     ```bash
     streamlit run web_ui.py
     ```
-### 服务器部署
+### 服务器部署 Server Deployment
 方法一:  Linux环境本地安装和执行Docker
 * 服务器拉取github仓库
 * 构建镜像
@@ -138,10 +140,10 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
 方法二:  Docker Hub拉取和执行镜像
 * [Docker Hub链接](https://hub.docker.com/repository/docker/jiyuanc1/aibot/general)
 
-部署教程
+部署教程 
 * 服务器部署教程：[wiki链接](https://github.com/Boomm-shakalaka/AIBot-LLM/wiki/Oracle%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B)
 
-## Docker构建镜像已知问题
+## Docker构建镜像已知问题 The Known Issues with Building Docker Images 
 1. Google-genai打包失败,没有找到该问题原因
     ```bash
     ERROR: Could not find a version that satisfies the requirement langchain-google-genai (from -r requirements.txt (line 11)) (from >versions: none) 
@@ -157,9 +159,13 @@ Langchain, Streamlit, Oracle Cloud, Groq,Google cloud, Baidu Cloud, Docker
 3. playwright无法直接打包进Docker! 需要基于Ubuntu镜像环境[参考](https://stackoverflow.com/questions/72181737/issue-running-playwright-python-in-docker-container)
 
 
-## 版本更新记录
+## 版本更新 Version Update Records
+<details>
+<summary>📈 更新记录</summary>
+
 v1.0.1 (oracle)
 1. 解决Docker构建镜像问题，解决不同操作系统存在的异步方法
+2. 更新Readme
 
 v1.0.0 
 1. 优化pdf chat功能中的简历评估功能，增加对话
@@ -221,3 +227,4 @@ v0.0.1
 4. 添加大模型于chatBot页面，完成聊天对话基本功能
 5. 新增模型选择功能
 
+</details>

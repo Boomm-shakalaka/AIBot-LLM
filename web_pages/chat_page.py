@@ -6,6 +6,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_groq import ChatGroq
 from langchain_community.chat_models import QianfanChatEndpoint
 from config_setting import model_config,prompt_config
+from langchain_openai import ChatOpenAI
 # from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import find_dotenv, load_dotenv
 
@@ -15,9 +16,26 @@ class chatbot:
         初始化ChatBot类的实例，加载环境变量并设置模型选项和令牌数。
         """
         load_dotenv(find_dotenv())#加载环境变量
-        self.model_option = None
-        self.model_tokens = None
         self.llm = None
+
+    def init_llm_model(self,select_platform,select_model,select_temperature):
+        """
+        初始化模型。
+
+        Parameters:
+        select_platform (str): 选择的模型平台。
+        select_model (str): 选择的模型。
+        """
+        model_tokens = model_config.model_description_ls[select_model]["tokens"]
+        if select_platform=='百度云平台':
+            self.llm = QianfanChatEndpoint(model=select_model,temperature=select_temperature)
+        elif select_platform=='Groq平台':
+            self.llm = ChatGroq(model_name=select_model,max_tokens=model_tokens,temperature=select_temperature)
+        elif select_platform=='Siliconflow平台':
+            self.llm = ChatOpenAI(model_name=select_model,base_url="https://api.siliconflow.cn/v1",temperature=select_temperature)
+        # elif select_platform=='Google':
+        #     self.llm = ChatGoogleGenerativeAI(model=select_model,temperature=0.7)#ChatGoogleGenerativeAI模型
+
 
     def get_response(self,question,chat_history):
         """
@@ -31,15 +49,8 @@ class chatbot:
         str或generator: 如果使用流式输出，返回一个生成器对象；否则返回一个字符串。
         """
         try:
-            if self.model_option =='ERNIE-Lite-8K' or self.model_option=='ERNIE-speed-128k': #选择百度千帆大模型
-                self.llm = QianfanChatEndpoint(model=self.model_option)
-            # elif self.model_option == 'gemini-1.5-flash-latest': #选择谷歌Gemma大模型,不支持流式输出暂未使用
-            #     model_choice=random.choice(["gemini-1.5-flash-latest",'gemini-1.0-pro-001','gemini-1.5-pro-latest',"gemini-1.0-pro"])
-            #     self.llm = ChatGoogleGenerativeAI(model=model_choice,temperature=0.7)#ChatGoogleGenerativeAI模型
-            else:
-                self.llm = ChatGroq(model_name=self.model_option,temperature=0.5,max_tokens=self.model_tokens)#ChatGroq模型
             prompt = ChatPromptTemplate.from_template(prompt_config.chatbot_prompt)
-            chain = prompt | self.llm | StrOutputParser()
+            chain = prompt | self.llm| StrOutputParser()
             # result=chain.invoke({"chat_history": chat_history,"question": question,}) #非流式输出
             # return result
             return chain.stream({
@@ -71,15 +82,14 @@ def clear():
     st.session_state.chat_message = [] #清除聊天记录
     st.session_state.chat_bot = chatbot() #重新初始化模型
 
-    
 def chat_page():
     init_params()#初始化模型和聊天记录
     '''页面布局'''    
     with st.sidebar:
         with st.container(border=True):
-            select_model=st.selectbox("选择模型",options=["百度千帆大模型-8k","百度千帆大模型-128k","谷歌Gemma大模型","Llama3-70b大模型","Llama3-8b大模型","Mixtral大模型"],index=0)#模型选择
-            model_option=model_config.model_ls[select_model]["name"]#模型名称
-            model_tokes=model_config.model_ls[select_model]["tokens"]#模型tokens
+            select_platform=st.selectbox("选择模型平台",options=list(model_config.model_platform_ls.keys()))#模型选择
+            select_model=st.selectbox("选择模型",options=model_config.model_platform_ls[select_platform]) 
+            select_temperature=st.slider("温度系数",min_value=0.1,max_value=1.0,step=0.1,value=0.7,help='数值低输出更具确定和一致性，数值高更具创造和多样性')#温度选择
             st.button(label="清除聊天记录", on_click=lambda: clear(),use_container_width=True) #清除聊天记录按钮
     st.title("💬 AI聊天机器人")
     st.subheader(body='',divider="rainbow")
@@ -98,11 +108,10 @@ def chat_page():
     '''用户问题交互'''
     question = st.chat_input("输入你的问题")
     if question:
-        st.session_state.chat_bot.model_option = model_option
-        st.session_state.chat_bot.model_tokens = model_tokes
         with st.chat_message("Human"):
             st.markdown(question)
             st.session_state.chat_message.append(HumanMessage(content=question))#添加用户问题聊天记录
         with st.chat_message("AI"):
+            st.session_state.chat_bot.init_llm_model(select_platform,select_model,select_temperature)
             response = st.write_stream(st.session_state.chat_bot.get_response(question,st.session_state.chat_message)) #流式输出，所以不用markdown
             st.session_state.chat_message.append(AIMessage(content=response))#添加用户问题聊天记录

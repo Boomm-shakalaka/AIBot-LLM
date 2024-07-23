@@ -5,6 +5,7 @@ from web_pages.url_page import url_page
 from web_pages.pdf_page import pdf_page
 from web_pages.online_chat_page import online_chat_page
 from web_pages.about_page import about_page
+from web_pages.finews_page import finews_page
     
 st.set_page_config(
     page_title="AIBot",
@@ -33,6 +34,10 @@ pages = {
     "PDF解析": {
         "icon": "bi-filetype-pdf",
         "func": pdf_page,
+    },
+    "金融资讯Bot":{
+        "icon": "bi-newspaper",
+        "func": finews_page,
     },
     "关于About": {
         "icon": "bi-file-person",

@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+from langchain_openai import ChatOpenAI
 import streamlit as st
 from config_setting import prompt_config,model_config
 import requests
@@ -20,10 +21,18 @@ from langchain_community.chat_models import QianfanChatEndpoint
 class urlbot:
     def __init__(self):
         load_dotenv(find_dotenv())
-        self.model_option = None
-        self.model_tokens = None
         self.llm = None
         self.context = None
+        self.model_tokens=4096
+    
+    def init_llm_model(self,select_platform,select_model,select_temperature):
+        self.model_tokens = model_config.model_description_ls[select_model]["tokens"]
+        if select_platform=='百度云平台':
+            self.llm = QianfanChatEndpoint(model=select_model,temperature=select_temperature)
+        elif select_platform=='Groq平台':
+            self.llm = ChatGroq(model_name=select_model,max_tokens=self.model_tokens,temperature=select_temperature)
+        elif select_platform=='Siliconflow平台':
+            self.llm = ChatOpenAI(model_name=select_model,base_url="https://api.siliconflow.cn/v1",temperature=select_temperature)
 
     def generate_based_history_query(self,question,chat_history):
         rag_chain = PromptTemplate.from_template(prompt_config.query_generated_prompt) | self.llm | StrOutputParser()
@@ -38,10 +47,6 @@ class urlbot:
     def get_response(self,question,chat_history,vectorstore):
         try:
             '''get context'''
-            if self.model_option =='ERNIE-Lite-8K' or self.model_option=='ERNIE-speed-128k':
-                self.llm = QianfanChatEndpoint(model=self.model_option)
-            else:
-                self.llm = ChatGroq(model_name=self.model_option,temperature=0.1,max_tokens=self.model_tokens)
             query=self.generate_based_history_query(question,chat_history)
             self.context = vectorstore.max_marginal_relevance_search(query=query, k=8)
             '''限制context长度'''
@@ -53,10 +58,8 @@ class urlbot:
             if context_len+chat_history_len-200 >self.model_tokens:
                 self.context=self.context[:self.model_tokens-200]#限制context长度
                 chat_history=chat_history[:self.model_tokens-200]#限制chat_history长度
-
             '''get response'''
             chain = PromptTemplate.from_template(prompt_config.qa_retrieve_prompt) | self.llm | StrOutputParser()
-
             return chain.stream({
                     "chat_history":chat_history, 
                     "question": question,
@@ -67,7 +70,6 @@ class urlbot:
         except Exception as e:
             return f"当前检索暂不可用，请在左侧栏更换模型，或者选择其他功能。"
 
-        
 def init_params():
     if "url_messages" not in st.session_state:
         st.session_state.url_messages = []
@@ -75,8 +77,8 @@ def init_params():
         st.session_state.url=''
     if "url_bot" not in st.session_state:
         st.session_state.url_bot = urlbot()
-    if "vectorstore" not in st.session_state:
-        st.session_state.vectorstore = None
+    if "url_vectorstore" not in st.session_state:
+        st.session_state.url_vectorstore = None
 
 def request_website(url):
     headers = {
@@ -97,14 +99,12 @@ def clear():
         st.session_state.url=''
     if "url_bot" in st.session_state:
         st.session_state.url_bot = urlbot()
-    if "vectorstore" in st.session_state:
-        st.session_state.vectorstore = None
-
+    if "url_vectorstore" in st.session_state:
+        st.session_state.url_vectorstore = None
 
 def url_parser(url, select_crawler):
     parse_flag = False
     docs = ''
-    # try:
     if select_crawler == "Selenium":
         docs = crawler_modules.selenium_url_crawler(url)
     else:
@@ -119,26 +119,22 @@ def url_parser(url, select_crawler):
         return docs, parse_flag
     parse_flag = True
     return docs, parse_flag
-    # except Exception as e:
-    #     return docs, parse_flag
 
 def retrieve_data(docs):
-    # try:
     text_splitter = RecursiveCharacterTextSplitter(chunk_size = 1000,chunk_overlap = 200)
     splits = text_splitter.split_documents(docs)
     embeddings = CohereEmbeddings(model="embed-multilingual-v3.0")
     vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
     return vectorstore
-    # except Exception as e:
-    #     return f"当前文本嵌入向量处理产生问题，请稍后重试，或者选择其他AI功能"
+
 def url_page():
     init_params()
     '''页面布局'''
     with st.sidebar:
         with st.container(border=True):
-            select_model=st.selectbox("选择模型",options=["百度千帆大模型-128k","百度千帆大模型-8k","谷歌Gemma大模型","谷歌gemini大模型","Llama3-70b大模型","Llama3-8b大模型","Mixtral大模型"],index=0)
-            model_option=model_config.model_ls[select_model]["name"]
-            model_tokes=model_config.model_ls[select_model]["tokens"]
+            select_platform=st.selectbox("选择模型平台",options=list(model_config.model_platform_ls.keys()))#模型选择
+            select_model=st.selectbox("选择模型",options=model_config.model_platform_ls[select_platform]) 
+            select_temperature=st.slider("温度系数",min_value=0.1,max_value=1.0,step=0.1,value=0.7,help='数值低输出更具确定和一致性，数值高更具创造和多样性')#温度选择
             select_crawler=st.selectbox("选择爬虫",options=["Playwright","Selenium"],index=0)
             show_retrive=st.checkbox("展示检索来源",value=False)
             st.button(label="清除聊天记录", on_click=lambda: clear(),use_container_width=True)
@@ -176,7 +172,7 @@ def url_page():
                         status.update(label="解析失败，请更换爬虫模型或者URL", state="error", expanded=False)
                     else:#解析成功，开始向量嵌入
                         st.markdown("Embedding the data...")
-                        st.session_state.vectorstore=retrieve_data(docs)
+                        vectorstore=retrieve_data(docs)
                         status.update(label="Parsing complete!", state="complete", expanded=False)
                 if parse_flag:  #解析成功            
                     tmp_text = f"\n\n当前访问URL为: {st.session_state.url}.\n\n您可以询问关于该网页的问题。如果您想查询别的网页,请直接输入新的URL"
@@ -188,17 +184,16 @@ def url_page():
     
     '''用户问题交互'''
     question = st.chat_input()
-    if question and st.session_state.vectorstore:#判断是否有问题,并且已经解析成功
+    if question and vectorstore:#判断是否有问题,并且已经解析成功
         with st.chat_message("Human"):
             st.markdown(question)
             st.session_state.url_messages.append(HumanMessage(content=question))
         with st.chat_message("AI"):
             with st.spinner('检索中....'):
-                st.session_state.url_bot.model_option = model_option
-                st.session_state.url_bot.model_tokens = model_tokes
                 chat_history = st.session_state.url_messages
-                vectorstore = st.session_state.vectorstore
+                vectorstore = st.session_state.url_vectorstore
                 # response=st.session_state.url_bot.get_response(question,chat_history,vectorstore)
+                st.session_state.url_bot.init_llm_model(select_platform,select_model,select_temperature)
                 response = st.write_stream(st.session_state.url_bot.get_response(question,chat_history,vectorstore))#流式输出
                 st.session_state.url_messages.append(AIMessage(content=response))
             if show_retrive:#展示检索来源

@@ -10,6 +10,7 @@ from dotenv import find_dotenv, load_dotenv
 from config_setting import model_config
 from langchain_community.chat_models import QianfanChatEndpoint
 from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
 import crawler_modules
 
 class SearchBot:
@@ -18,9 +19,24 @@ class SearchBot:
         初始化SearchBot类的实例，加载环境变量并设置模型选项和令牌数。
         """
         load_dotenv(find_dotenv())#加载环境变量.env
-        self.model_option = None
-        self.model_tokens = None
+        self.llm = None
         self.content=None
+    
+    def init_llm_model(self,select_platform,select_model,select_temperature):
+        """
+        初始化模型。
+
+        Parameters:
+        select_platform (str): 选择的模型平台。
+        select_model (str): 选择的模型。
+        """
+        model_tokens = model_config.model_description_ls[select_model]["tokens"]
+        if select_platform=='百度云平台':
+            self.llm = QianfanChatEndpoint(model=select_model,temperature=select_temperature)
+        elif select_platform=='Groq平台':
+            self.llm = ChatGroq(model_name=select_model,max_tokens=model_tokens,temperature=select_temperature)
+        elif select_platform=='Siliconflow平台':
+            self.llm = ChatOpenAI(model_name=select_model,base_url="https://api.siliconflow.cn/v1",temperature=select_temperature)
 
     def generate_based_history_query(self,question,chat_history):
         """
@@ -75,10 +91,6 @@ class SearchBot:
         Returns:
         str或generator: 如果使用流式输出，返回一个生成器对象；否则返回一个字符串。
         """   
-        if self.model_option =='ERNIE-Lite-8K' or self.model_option=='ERNIE-speed-128k': #选择百度千帆大模型
-            self.llm = QianfanChatEndpoint(model=self.model_option)
-        else:
-            self.llm = ChatGroq(model_name=self.model_option,temperature=0.5,max_tokens=self.model_tokens)#ChatGroq模型
         try:
             judge_result=self.judge_search(question,chat_history)#判断是否需要搜索
             if 'yes' in judge_result:#需要搜索
@@ -121,7 +133,6 @@ def init_params():
     if "searchbot" not in st.session_state:
         st.session_state.search_bot = SearchBot()
 
-
 def clear():
     """
     清除会话状态中的搜索记录和SearchBot实例。
@@ -132,15 +143,14 @@ def clear():
     st.session_state.search_message = []
     st.session_state.search_bot = SearchBot()
 
-
 def online_chat_page():
     init_params() # 初始化模型和聊天记录
     '''页面布局'''  
     with st.sidebar:
         with st.container(border=True):
-            select_model=st.selectbox("选择模型",options=["百度千帆大模型-128k","百度千帆大模型-8k","谷歌Gemma大模型","Llama3-70b大模型","Llama3-8b大模型","Mixtral大模型"],index=0)# 模型选择
-            model_option=model_config.model_ls[select_model]["name"]
-            model_tokes=model_config.model_ls[select_model]["tokens"]
+            select_platform=st.selectbox("选择模型平台",options=list(model_config.model_platform_ls.keys()))#模型选择
+            select_model=st.selectbox("选择模型",options=model_config.model_platform_ls[select_platform]) 
+            select_temperature=st.slider("温度系数",min_value=0.1,max_value=1.0,step=0.1,value=0.7,help='数值低输出更具确定和一致性，数值高更具创造和多样性')#温度选择
             select_search_type=st.selectbox("选择搜索引擎模型",options=["duckduckgo","基于自动化爬虫搜索"],index=1)
             st.button(label="清除聊天记录", on_click=lambda: clear(),use_container_width=True)
     st.title("🌐在线聊天机器人")
@@ -157,17 +167,15 @@ def online_chat_page():
             with st.chat_message("Human"):
                 st.markdown(message.content)
 
-
     '''用户问题交互'''
     question = st.chat_input("输入你的问题")
     if question:
-        st.session_state.search_bot.model_option = model_option
-        st.session_state.search_bot.model_tokens = model_tokes
         with st.chat_message("Human"):
             st.markdown(question)
             st.session_state.search_message.append(HumanMessage(content=question))
         with st.chat_message("AI"):
-            with st.spinner('思考中....'):  
+            with st.spinner('思考中....'):
+                st.session_state.search_bot.init_llm_model(select_platform,select_model,select_temperature)
                 response =  st.write_stream(st.session_state.search_bot.get_response(question,select_search_type,st.session_state.search_message))#流式输出
             st.session_state.search_message.append(AIMessage(content=response))
 

@@ -1,5 +1,6 @@
 import random
 import time
+from langchain_openai import ChatOpenAI
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -18,8 +19,6 @@ class pdfbot:
         初始化PDFBot类的实例，加载环境变量并设置模型选项和令牌数。
         """
         load_dotenv(find_dotenv())
-        self.model_option = None
-        self.model_tokens = None
         self.llm = None
 
     def judge_type_prompt(self,pdf_type):
@@ -39,6 +38,24 @@ class pdfbot:
         # else:
         #     prompt=prompt_config.general_prompt
         return prompt
+
+    def init_llm_model(self,select_platform,select_model,select_temperature):
+        """
+        初始化模型。
+
+        Parameters:
+        select_platform (str): 选择的模型平台。
+        select_model (str): 选择的模型。
+        select_temperature (float): 温度系数。
+        """
+        self.model_option = select_model
+        self.model_tokens = model_config.model_description_ls[select_model]["tokens"]
+        if select_platform=='百度云平台':
+            self.llm = QianfanChatEndpoint(model=select_model,temperature=select_temperature)
+        elif select_platform=='Groq平台':
+            self.llm = ChatGroq(model_name=select_model,max_tokens=self.model_tokens,temperature=select_temperature)
+        elif select_platform=='Siliconflow平台':
+            self.llm = ChatOpenAI(model_name=select_model,base_url="https://api.siliconflow.cn/v1",temperature=select_temperature)
     
     def get_response(self,question,pdf_type,pdf_content,chat_history):
         """
@@ -54,10 +71,6 @@ class pdfbot:
         str或generator: 如果使用流式输出，返回一个生成器对象；否则返回一个字符串。
         """
         try:
-            if self.model_option =='ERNIE-Lite-8K' or self.model_option=='ERNIE-speed-128k':
-                self.llm = QianfanChatEndpoint(model=self.model_option)
-            else:
-                self.llm = ChatGroq(model_name=self.model_option,temperature=0.1,max_tokens=self.model_tokens)
             prompt_selected=self.judge_type_prompt(pdf_type)
             prompt = ChatPromptTemplate.from_template(prompt_selected)
             chain = prompt | self.llm | StrOutputParser()
@@ -106,7 +119,7 @@ def clear():
     st.session_state.resume_summary=None
     
 
-def summary_resume(pdf_content,model_option,model_tokes):
+def summary_resume(pdf_content,select_platform,select_model):
     """
     生成PDF简历的摘要。
 
@@ -119,10 +132,14 @@ def summary_resume(pdf_content,model_option,model_tokes):
     str或generator: 如果使用流式输出，返回一个生成器对象；否则返回一个字符串。
     """
     try:
-        if model_option =='ERNIE-Lite-8K':
-            llm = QianfanChatEndpoint(model=model_option,temperature=0.7)
-        else:
-            llm = ChatGroq(model_name=model_option,temperature=1,max_tokens=model_option)
+        select_temperature=0.2
+        model_tokens = model_config.model_description_ls[select_model]["tokens"]
+        if select_platform=='百度云平台':
+            llm = QianfanChatEndpoint(model=select_model,temperature=select_temperature)
+        elif select_platform=='Groq平台':
+            llm = ChatGroq(model_name=select_model,max_tokens=model_tokens,temperature=select_temperature)
+        elif select_platform=='Siliconflow平台':
+            llm = ChatOpenAI(model_name=select_model,base_url="https://api.siliconflow.cn/v1",temperature=select_temperature)
         prompt_selected=prompt_config.resume_summary_prompt
         prompt = ChatPromptTemplate.from_template(prompt_selected)
         chain = prompt | llm | StrOutputParser()
@@ -130,7 +147,7 @@ def summary_resume(pdf_content,model_option,model_tokes):
             "resume_content": pdf_content,
         })
     except Exception as e:
-        return f"当前模型{model_option}暂不可用，请在左侧栏选择其他模型。"
+        return f"当前模型{select_model}暂不可用，请在左侧栏选择其他模型。"
     
 
 def pdf_page():
@@ -138,9 +155,9 @@ def pdf_page():
     '''页面布局'''
     with st.sidebar:
         with st.container(border=True):
-            select_model=st.selectbox("选择模型",options=["百度千帆大模型-8k","百度千帆大模型-128k","谷歌Gemma大模型","Llama3-70b大模型","Llama3-8b大模型","Mixtral大模型"],index=0)#模型选择
-            model_option=model_config.model_ls[select_model]["name"]
-            model_tokes=model_config.model_ls[select_model]["tokens"]
+            select_platform=st.selectbox("选择模型平台",options=list(model_config.model_platform_ls.keys()))#模型选择
+            select_model=st.selectbox("选择模型",options=model_config.model_platform_ls[select_platform]) 
+            select_temperature=st.slider("温度系数",min_value=0.1,max_value=1.0,step=0.1,value=0.7,help='数值低输出更具确定和一致性，数值高更具创造和多样性')#温度选择
             st.button(label="清除聊天记录", on_click=lambda: clear(),use_container_width=True)
     st.title("🗎pdf解析-AI机器人")
     st.subheader(body='',divider="rainbow")
@@ -169,11 +186,9 @@ def pdf_page():
             st.session_state.pdf_content = loader.load_and_split()
             os.remove(tmp_file.name)
             '''先整体回答PDF问题'''
-            st.session_state.pdf_bot.model_option = model_option
-            st.session_state.pdf_bot.model_tokens = model_tokes
             if pdf_type=='简历分析':
                 with st.chat_message("AI"):
-                    st.session_state.resume_summary = st.write_stream(summary_resume(st.session_state.pdf_content,model_option,model_tokes))#简历分析
+                    st.session_state.resume_summary = st.write_stream(summary_resume(st.session_state.pdf_content,select_platform,select_model))#简历分析
                     st.session_state.pdf_message.append(AIMessage(content=st.session_state.resume_summary))
         else:
             st.warning("请先上传P正确的PDF文件")
@@ -190,27 +205,12 @@ def pdf_page():
     '''用户问题交互'''
     question = st.chat_input("输入你的问题")
     if question and st.session_state.pdf_content is not None:
-        st.session_state.pdf_bot.model_option = model_option
-        st.session_state.pdf_bot.model_tokens = model_tokes
         with st.chat_message("Human"):
             st.markdown(question)
             st.session_state.pdf_message.append(HumanMessage(content=question))
         with st.chat_message("AI"):
+            st.session_state.pdf_bot.init_llm_model(select_platform,select_model,select_temperature)
             response = st.write_stream(st.session_state.pdf_bot.get_response(question,pdf_type,st.session_state.pdf_content,st.session_state.pdf_message))
             st.session_state.pdf_message.append(AIMessage(content=response))
-        
-   
-
-    
-
-   
-
-
-
-
-
-    
-
-
 
 

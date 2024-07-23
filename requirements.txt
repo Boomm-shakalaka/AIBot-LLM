@@ -9,6 +9,7 @@ langchain_cohere
 chromadb
 duckduckgo-search
 qianfan
+langchain-openai
 asyncio
 webdriver-manager
 # langchain-google-genai
